@@ -1,0 +1,43 @@
+NAME="rdp2tcp"
+VERSION=0.1
+RELEASE=1sb1
+CATEGORY="Net"
+SUMMARY="Tunneling tool on top of remote desktop protocol (RDP)"
+DESCRIPTION="rdp2tcp is a tunneling tool on top of remote desktop protocol
+(RDP). It uses RDP virtual channel capabilities to multiplex several ports
+forwarding over an already established rdesktop session."
+HOMEPAGE="http://rdp2tcp.sourceforge.net/"
+SRC_URI="mirror://sourceforge/rdp2tcp/${NAME}-${VERSION}.tar.gz"
+SRC_DIR=rdp2tcp
+
+PKG_NAMES="${NAME}-client ${NAME}-servers"
+
+rdp2tcp_client_SUMMARY="${SUMMARY} (client)"
+rdp2tcp_client_CONTENTS="usr/bin/rdp2tcp-client.exe usr/share/doc/${NAME}/"
+
+rdp2tcp_servers_SUMMARY="${SUMMARY} (servers)"
+rdp2tcp_servers_CONTENTS="usr/share/${NAME}/"
+
+src_compile() {
+	cd ${S}
+	lndirs
+	cd ${B}
+	cygmake client
+	cygmake -C server -f Makefile.mingw32 clean
+	mkdir i686 x86_64
+	cygmake -C server -f Makefile.mingw32 CC=i686-w64-mingw32-gcc
+	cp -p server/rdp2tcp.exe i686/rdp2tcp-server.exe
+	cygmake -C server -f Makefile.mingw32 clean
+	cygmake -C server -f Makefile.mingw32 CC=x86_64-w64-mingw32-gcc
+	cp -p server/rdp2tcp.exe x86_64/rdp2tcp-server.exe
+	# cygmake -C server -f Makefile.mingw32 clean
+}
+
+src_install() {
+	cd ${B}
+	mkdir -p ${D}/usr/bin/ ${D}/usr/share/rdp2tcp/server/i686/ ${D}/usr/share/rdp2tcp/server/x86_64/
+	cp -p client/rdp2tcp.exe ${D}/usr/bin/rdp2tcp-client.exe
+	cp -p i686/rdp2tcp-server.exe ${D}/usr/share/rdp2tcp/server/i686/
+	cp -p x86_64/rdp2tcp-server.exe ${D}/usr/share/rdp2tcp/server/x86_64/
+	# cyginstall STRIP=:
+}

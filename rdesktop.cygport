@@ -1,0 +1,28 @@
+NAME="rdesktop"
+VERSION=1.8.2
+RELEASE=1sb2
+CATEGORY="Net"
+SUMMARY="Client for MS Terminal Services and Remote Desktop protocols"
+DESCRIPTION="rdesktop is a client for Microsoft Windows NT Terminal Server,
+Windows 2000 Terminal Services, Windows 2003 Terminal Services/Remote Desktop,
+Windows XP Remote Desktop, and possibly other Terminal Services products.
+rdesktop currently implements the RDP version 4 and 5 protocols."
+HOMEPAGE="http://rdesktop.sourceforge.net/"
+SRC_URI="mirror://sourceforge/rdesktop/${NAME}-${VERSION}.tar.gz"
+PATCH_URI="http://pkgs.fedoraproject.org/cgit/rdesktop.git/plain/rdesktop-libao.patch http://sourceforge.net/p/rdesktop/patches/_discuss/thread/066465c7/1ace/attachment/oop-1.8.1.patch"
+
+src_compile() {
+	cd ${S}
+	cygautoreconf
+	lndirs
+	cd ${B}
+	# --with-libvncserver: vnc/* sources aren't shipped with tarball
+	cygconf --with-ipv6 --with-openssl=/usr --with-sound=libao \
+		--disable-credssp --disable-smartcard
+	cygmake
+}
+
+src_install() {
+	cd ${B}
+	cyginstall STRIP=:
+}
